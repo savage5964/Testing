@@ -20,26 +20,24 @@ $(document).ready(function () {
 
 function cargarElementos() {
 
+    crearTablaBuscarArticulo();
+    crearTablaBuscarLogArticulo();
+
     $('.ui.checkbox').checkbox();
 
     $('.ui.dropdown').dropdown();
 
+    // validación de los artículos, campos vacíos
+    validarArticulo();
+
+    console.log("haciendo la tabla para artículos");
     var $modalBuscarArticulo = $('#modal-buscar-articulo');
-//    console.log("haciendo la tabla para artículos");
-//    console.log($modalBuscarArticulo);
 
     // modal para la búsqueda de artículos
     $modalBuscarArticulo.modal('attach events', '#btn-buscar-articulo', 'show');
 
-    $('#btn-buscar-articulo').on('click', function () {
-        $('.ui.modal').modal('show');
-//        hacer la consulta para llenar el grid de artículo
-        consultarLogArticulo();
-    });
-    
-//    // eventos para resize de tablas
     $modalBuscarArticulo.modal('setting', 'onVisible', function () {
-        w2ui['grid-buscar-articulo'].resize();
+//        w2ui['grid-buscar-articulo'].resize();
         w2ui['grid-buscar-log-articulo'].resize();
     });
 
@@ -47,10 +45,20 @@ function cargarElementos() {
             {
                 onVisible: function () {
                     w2ui['grid-buscar-articulo'].resize();
-                    w2ui['grid-buscar-log-articulo'].resize();
                 }
             }
     );
+
+    $('#btn-buscar-articulo').on('click', function () {
+        $('.ui.modal').modal('show');
+//        hacer la consulta para llenar el grid de artículo
+        consultarLogArticulo();
+//        w2ui['grid-buscar-log-articulo'].resize();
+    });
+
+//    // eventos para resize de tablas
+
+
 
     $('#btn-guardar').click(function () {
         guardarArticulo();
@@ -62,10 +70,21 @@ function cargarElementos() {
         // va dentro del método autorizarArticulo()
 //        notifySicon.show(notifySicon.TITLE_ENVIAR_AUTORIZAR, notifySicon.MSG_ENVIAR_AUTORIZAR);
     });
-
-    crearTablaBuscarArticulo();
-
     console.log("Elementos cargados correctamente");
+}
+
+function validarArticulo() {
+    $('form-definicion-articulo').form({
+        fields: {
+            descripcionLarga: {
+                identifier: 'descripcionLarga',
+                rules: [{
+                        type: 'empty',
+                        prompt: 'Por favor ingrese una Descripción.'
+                    }]
+            } //, se colocan las demás validaciones, para el artículo
+        }
+    });
 }
 
 function cargarImagen() {
@@ -128,8 +147,6 @@ function listadoArticulos() {
     // TODO
 }
 
-
-
 function autorizarArticulo() {
     // TODO
 }
@@ -180,7 +197,7 @@ function consultarLogArticulo() {
 //    mostrar un listado de los elementos en el grid
     $.ajax({
         // cambiar en el controller para hacer la búsqueda sobre LogArticulo
-        url: APP_CONTEXT + '/articulo/listarLogArticulos',
+        url: APP_CONTEXT + '/articulo/listadoLogArticulo',
         async: false,
         contentType: 'application/json',
         type: 'GET',
@@ -188,9 +205,74 @@ function consultarLogArticulo() {
         success: function (records) {
 //            notifySicon.MSG_SIN_REGISTRO;
             console.log(records);
+            console.log('se realiza la seguda llamada para actualizar los campos');
+            w2ui['grid-buscar-log-articulo'].destroy();
+            
+            $('#grid-buscar-log-articulo').w2grid({
+                name: 'grid-buscar-log-articulo',
+                header: 'Articulos',
+                show: {
+                    toolbar: true,
+                    footer: true,
+                    toolbarReload: false,
+                    toolbarColumns: false
+                },
+                toolbar: {
+                    items: [
+                        {type: 'spacer'},
+                        {type: 'button', id: 'item-editar', caption: 'Editar', icon: 'w2ui-icon-pencil', disabled: true},
+                        {type: 'break'},
+                        {type: 'button', id: 'item-eliminar', caption: 'Eliminar', icon: 'w2ui-icon-cross', disabled: true}
+                    ],
+                    onClick: function (target, data) {
+                        if (target === 'item-eliminar') {
+                            // TODO agregar lógica botón aceptar
+                            w2popup.open({
+                                title: notifySicon.TITLE_ATENCION,
+                                body: '<div class="w2ui-centered">' + notifySicon.MSG_ELIMINAR + '</div>',
+                                buttons: '<button class="ui primary button btn" onclick="eliminarLogArticulo();">Aceptar</button><button class="ui black button btn" onclick="w2popup.close();">Cancelar</button>',
+                                width: 400,
+                                height: 200,
+                                overflow: 'hidden',
+                                color: '#333',
+                                speed: '0.3',
+                                opacity: '0.8',
+                                modal: true,
+                                showClose: false,
+                                showMax: false
+                            });
+                        } else {
+                            var grid = w2ui['grid-buscar-log-articulo'].getSelection();
+                            var row = w2ui['grid-buscar-log-articulo'].get(grid);
+                            console.log(row.recid);
+                            console.log(row.recid);
+                            modificarArticulo(row.recid);
+                        }
+                    }
+                },
+                columns: [
+                    {field: 'recid', caption: 'ID Artículo', size: '10%', sortable: true, attr: 'align=center'},
+                    {field: 'tipoArticulo', caption: 'Tipo De Artículo', size: '14%', sortable: true, resizable: true},
+                    {field: 'descripcion', caption: 'Descripcion', size: '14%', sortable: true, resizable: true},
+                    {field: 'familia', caption: 'Familia', size: '17%', sortable: true, resizable: true},
+                    {field: 'metal', caption: 'Metal', size: '14%', sortable: true, resizable: true},
+                    {field: 'acabado', caption: 'Acabado', size: '17%', sortable: true, resizable: true},
+                    {field: 'cunio', caption: 'Cuño', size: '14%', sortable: true, resizable: true}
+                ],
+                sortData: [{field: 'recid', direction: 'ASC'}],
+                records: records,
+                onSelect: function (event) {
+                    event.onComplete = function () {
+                        this.toolbar.enable('item-editar');
+                        this.toolbar.enable('item-eliminar');
+                    };
+                }
+            });
 
 
         }, error: function (jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(errorThrown);
 
         }, complete: function (jqXHR, textStatus) {
             notifySicon.MSG_SIN_REGISTRO;
@@ -216,7 +298,6 @@ function crearTablaBuscarLogArticulo() {
                     toolbarReload: false,
                     toolbarColumns: false
                 },
-//        },
                 toolbar: {
                     items: [
                         {type: 'spacer'},
@@ -286,87 +367,90 @@ function modificarArticulo(idArticulo) {
         contentType: 'application/json',
         async: false,
         type: "GET",
-        dataType: 'json'
-    }).done(function (articulo) {
-
-        // llenar los datos de la forma con la información recuperada
-        alert("llega acá");
-        $('#id-articulo').show();
-        $('#fecha-autorizacion').show();
+        dataType: 'json',
+        success: function (articuloImgDto) {
+            // llenar los datos de la forma con la información recuperada
+            alert("llega acá");
+            $('#id-articulo').show();
+            $('#fecha-autorizacion').show();
 //    $('#id-articulo').hide();
-        $('#id-articulo').text(idArticulo);
-        console.log(idArticulo);
-        //ver como traer la fecha de registro del artículo, desde logArticulo
+            $('#id-articulo').text(idArticulo);
+            console.log(idArticulo);
+            //ver como traer la fecha de registro del artículo, desde logArticulo
 //            $('#fecha-hora').text(w2utils.formatDateTime((new Date(cliente.fechaHora)), 'dd/mm/yyyy hh:mm')).show();
-        // colocar la fecha que regrese del sistema en caso de que cuente con autorización
-        $('#fecha-autorizacion').text("test");
-        // Definición
-        if (articulo.activo) {
-            $('#articulo-activo-checkbox').checkbox('check');
-        } else {
-            $('#articulo-activo-checkbox').checkbox('uncheck');
+            // colocar la fecha que regrese del sistema en caso de que cuente con autorización
+            $('#fecha-autorizacion').text("test");
+            // Definición
+            if (articuloImgDto.activo) {
+                $('#articulo-activo-checkbox').checkbox('check');
+            } else {
+                $('#articulo-activo-checkbox').checkbox('uncheck');
+            }
+            // ver como hacer para el estado
+            $('#descripcion-larga').val(articuloImgDto.desripcionLarga);
+            $('#descripcion-ingles').val(articuloImgDto.descripcionIngles);
+            $('#descripcion-corta').val(articuloImgDto.descripcionCorta);
+            $('#clave-cmm').val(articuloImgDto.claveCmm);
+            $('#clave-capsula').val(articuloImgDto.claveCapsula);
+            $('#articuloImgDto-relacionado-select').dropdown('set selected', articuloImgDto.articuloRelacionaldo.id);
+
+            // Imagenes
+
+            // Características
+            // familia. cuño. valor nominal.
+            $('#familia-select').dropdown('set selected', articuloImgDto.familia.id);
+            $('#tipo-articulo-select').dropdown('set selected', articuloImgDto.tipoArticulo.id);
+            $('#decreto-select').dropdown('set selected', articuloImgDto.decreto.id);
+            $('#clave-informe').val(articuloImgDto.claveInforme);
+            $('#cunio').val(articuloImgDto.cunio);
+            $('#ley').val(articuloImgDto.ley);
+            $('#valor-nominal').val(articuloImgDto.valorNominal);
+            // dimensiones
+            $('#espesor').val(articuloImgDto.espesor);
+            $('#diametro').val(articuloImgDto.deametro);
+            // tolerancias
+            $('#tol-ley-oro').val(articuloImgDto.tolLeyOro);
+            $('#tol-ley-plata').val(articuloImgDto.tolLeyPlata);
+            $('#tol-peso-oro').val(articuloImgDto.tolPesoOro);
+            $('#tol-peso-plata').val(articuloImgDto.tolPesoPlata);
+            $('#tol-conjunto-peso-oro').val(articuloImgDto.tolConjuntoPesoOro);
+            $('#tol-conjunto-peso-plata').val(articuloImgDto.tolConjuntoPesoPlata);
+            $('#premio-dolar').val(articuloImgDto.premioDolar);
+            $('#premio-porcentaje').val(articuloImgDto.premioPorcentaje);
+
+            // COSTEO
+            // costos
+            $('#contrato-cmm-select').dropdown('set selected', articuloImgDto.contratoCmm.id);
+            $('#costo-produccion-usd').val(articuloImgDto.costoProduccionUsd);
+            $('#costo-variable').val(articuloImgDto.costoVariable);
+            $('#costo-fijo-herramental').val(articuloImgDto.costoFijoHerramental);
+
+            // metal y acabado
+            $('#metal-select').dropdown('set selected', articuloImgDto.metal.id);
+            $('#acabado-select').dropdown('set selected', articuloImgDto.acabado.id);
+
+            // contenido de metal
+            $('#contenido-onzas-oro').val(articuloImgDto.contenidoOnzasOro);
+            $('#contenido-onzas-plata').val(articuloImgDto.contenidoOnzasPlata);
+            $('#merma-oro').val(articuloImgDto.mermaOro);
+            $('#merma-plata').val(articuloImgDto.mermaPlata);
+            $('#contenido-onzas-cobre').val(articuloImgDto.contenidoOnzasCobre);
+            $('#contenido-porcentaje-cobre').val(articuloImgDto.contenidoPorcentajeCobre);
+
+            // COMERCIALIZACION
+            if (articuloImgDto.iva) {
+                $('#iva-checkbox').checkbox('check');
+            } else {
+                $('#iva-checkbox').checkbox('uncheck');
+            }
+
+            // ver como hacer la relación con el tipo de comercialización
+//            $('#tipo-comercializacion-select').dropdown('set selected', articuloImgDto.tipoCom)            
+
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
         }
-        // ver como hacer para el estado
-        $('#descripcion-larga').val(articulo.desripcionLarga);
-        $('#descripcion-ingles').val(articulo.descripcionIngles);
-        $('#descripcion-corta').val(articulo.descripcionCorta);
-        $('#clave-cmm').val(articulo.claveCmm);
-        $('#clave-capsula').val(articulo.claveCapsula);
-        $('#articulo-relacionado-select').dropdown('set selected', articulo.articuloRelacionaldo.id);
-
-        // Imagenes
-
-        // Características
-        // familia. cuño. valor nominal.
-        $('#familia-select').dropdown('set selected', articulo.familia.id);
-        $('#tipo-articulo-select').dropdown('set selected', articulo.tipoArticulo.id);
-        $('#decreto-select').dropdown('set selected', articulo.decreto.id);
-        $('#clave-informe').val(articulo.claveInforme);
-        $('#cunio').val(articulo.cunio);
-        $('#ley').val(articulo.ley);
-        $('#valor-nominal').val(articulo.valorNominal);
-        // dimensiones
-        $('#espesor').val(articulo.espesor);
-        $('#diametro').val(articulo.deametro);
-        // tolerancias
-        $('#tol-ley-oro').val(articulo.tolLeyOro);
-        $('#tol-ley-plata').val(articulo.tolLeyPlata);
-        $('#tol-peso-oro').val(articulo.tolPesoOro);
-        $('#tol-peso-plata').val(articulo.tolPesoPlata);
-        $('#tol-conjunto-peso-oro').val(articulo.tolConjuntoPesoOro);
-        $('#tol-conjunto-peso-plata').val(articulo.tolConjuntoPesoPlata);
-        $('#premio-dolar').val(articulo.premioDolar);
-        $('#premio-porcentaje').val(articulo.premioPorcentaje);
-
-        // COSTEO
-        // costos
-        $('#contrato-cmm-select').dropdown('set selected', articulo.contratoCmm.id);
-        $('#costo-produccion-usd').val(articulo.costoProduccionUsd);
-        $('#costo-variable').val(articulo.costoVariable);
-        $('#costo-fijo-herramental').val(articulo.costoFijoHerramental);
-
-        // metal y acabado
-        $('#metal-select').dropdown('set selected', articulo.metal.id);
-        $('#acabado-select').dropdown('set selected', articulo.acabado.id);
-
-        // contenido de metal
-        $('#contenido-onzas-oro').val(articulo.contenidoOnzasOro);
-        $('#contenido-onzas-plata').val(articulo.contenidoOnzasPlata);
-        $('#merma-oro').val(articulo.mermaOro);
-        $('#merma-plata').val(articulo.mermaPlata);
-        $('#contenido-onzas-cobre').val(articulo.contenidoOnzasCobre);
-        $('#contenido-porcentaje-cobre').val(articulo.contenidoPorcentajeCobre);
-
-        // COMERCIALIZACION
-        if (articulo.iva) {
-            $('#iva-checkbox').checkbox('check');
-        } else {
-            $('#iva-checkbox').checkbox('uncheck');
-        }
-
-        // ver como hacer la relación con el tipo de comercialización
-//            $('#tipo-comercializacion-select').dropdown('set selected', articulo.tipoCom)            
-
     });
 }
 
@@ -498,6 +582,12 @@ function peticionGuardarArticulo(logArticuloDto) {
 //            if (imagenes !== null) {
 //                guardarImagen();
 //            }
+
+            // posteriormente hacer la actualización en la tabla de los 
+            // logArticulo para que muestre la información actualizada
+            
+            
+            
             console.log('se completo el guardado');
             notifySicon.show(notifySicon.TITLE_GUARDAR, notifySicon.MSG_GUARDAR);
         },

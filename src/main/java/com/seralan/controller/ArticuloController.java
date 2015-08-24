@@ -82,6 +82,7 @@ public class ArticuloController {
         return "/catalogo/articulo";
     }
 
+    // ya está
     @RequestMapping(value = "/ajax/save", method = RequestMethod.POST)
     public @ResponseBody
     Integer guardarArticulo(@RequestBody LogArticuloDto logArticuloDto)
@@ -100,8 +101,8 @@ public class ArticuloController {
         return false;
     }
 
-    // listado para el primer grid
-    @RequestMapping(value = "/listarLogArticulos", method = RequestMethod.GET)
+    // listado para el primer grid (LogArticulo)
+    @RequestMapping(value = "/listadoLogArticulo", method = RequestMethod.GET)
     public @ResponseBody
     List<ArticuloGridDto> listadoLogArticulos() throws CommonException, IOException {
 //        muestra el listado de artículos GUARDADOS para el grid artículos autorizados
@@ -141,7 +142,7 @@ public class ArticuloController {
     
     // Se activa cuando presione el botón de buscar en los filtros de búsqueda
     // traer todos los campos para la búsqueda
-    @RequestMapping(value = "/listarArticulos", method = RequestMethod.GET)
+    @RequestMapping(value = "/listadoGridArticulo", method = RequestMethod.GET)
     public @ResponseBody
     List<ArticuloGridDto> listadoArticulos() throws CommonException, IOException {
 //        muestra el listado de artículos AUTORIZADOS para el grid artículos autorizados

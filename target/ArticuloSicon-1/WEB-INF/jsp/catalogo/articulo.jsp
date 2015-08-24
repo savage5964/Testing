@@ -93,7 +93,7 @@
                 </div>
 
                 <%--definición de artículo--%>
-                <div class="ui form rissed segment">
+                <div id="form-definicion-articulo" class="ui form rissed segment">
                     <%--botón borrar--%>
                     <a href="#" class="ui blue right corner label limpiar"><i class="icon erase"></i></a>
                         <%--ribbon--%>
