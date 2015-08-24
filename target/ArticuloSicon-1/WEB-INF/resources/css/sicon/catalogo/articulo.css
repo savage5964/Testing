@@ -1,0 +1,44 @@
+/* 
+    Created on : 28/07/2015, 04:02:21 PM
+    Author     : t41841
+*/
+
+.container{
+    margin-top: 20px;
+}
+
+#campos{
+    margin: 0 auto;
+}
+
+/*#dimensiones{
+    height: auto;
+}*/
+
+#divDimensiones div{
+    margin: 0 auto;    
+    /*margin-right: 15px;*/
+}
+
+form#articuloModel {
+    min-height: 300px;
+}
+
+.ui.rised.segment.error_manual,
+.card.card_uno .content.error_manual,
+.card.card_dos .content.error_manual{
+    background: #fff6f6 none repeat scroll 0 0;
+    border-color: #e0b4b4;
+}
+
+.ui.card, .ui.cards > .card {
+    width: 282px;
+}
+
+.card .content{
+    height: 48px;
+}
+
+.ui.form .required.field>.checkbox:after{
+    content: '';
+}

@@ -1,0 +1,37 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 23/07/2015, 02:47:44 PM
+    Author     : D13515
+*/
+
+#buscar-articulos-grid,
+#mostrar-kit-grid{
+    height: 333px;
+}
+
+#ver-articulos-grid{
+    height: 378px;
+}
+
+.ui.ribbon.label {
+    margin-bottom: .5em;
+}
+
+.ui.card, .ui.cards > .card {
+    width: 282px;
+}
+
+.card .content{
+    height: 48px;
+}
+
+.ui.rised.segment.error_manual,
+.card.card_uno .content.error_manual,
+.card.card_dos .content.error_manual{
+    background: #fff6f6 none repeat scroll 0 0;
+    border-color: #e0b4b4;
+}

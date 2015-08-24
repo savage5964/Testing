@@ -1,0 +1,50 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 4/08/2015, 04:13:33 PM
+    Author     : D13515
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+/* **  * ** Estilo para detalle del kit ** *  ** */
+#detalle_kit_modal .ui.ribbon.label {
+    margin-bottom: .8em;
+}
+
+.ui.table.table_detalle_kit{
+    border: none;
+}
+
+.ui.table.table_detalle_kit tr td{
+    border-top: none;
+    padding: 0em .5em 1.5em .5em;
+    text-align: justify
+}
+
+.ui.table.table_detalle_kit tr td:nth-child(1){
+    font-weight: bold;
+    vertical-align: top;
+}
+
+.ui.card > .content.content.content_detalle_kit{
+    text-align: center;
+}
+
+.right.menu.menu_detalle_kit{
+    padding: 12px;
+}
+
+.right.menu.menu_detalle_kit span:nth-child(1),
+.right.menu.menu_detalle_kit span:nth-child(3){
+    font-weight: bold;
+    margin-left: 22px;
+    margin-right: 4px;
+}
+
+#detalle_articulos_kit{
+    height: 333px;
+}
+
